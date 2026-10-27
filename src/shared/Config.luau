@@ -36,6 +36,7 @@ local Config = {
 		StarvingDamagePerSecond = 1,
 		-- Hunger each food restores when eaten.
 		FoodRestores = { Berries = 20, Bread = 40, FeastBasket = 100 },
+		TickSeconds = 0.5, -- how often the server applies hunger and sends stats
 	},
 
 	Weapons = {

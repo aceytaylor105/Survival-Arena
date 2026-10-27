@@ -7,12 +7,19 @@ local BotService = require(script.BotService)
 local CombatService = require(script.CombatService)
 local LootService = require(script.LootService)
 local RoundService = require(script.RoundService)
+local SurvivalService = require(script.SurvivalService)
 
 Remotes.setAliveCheck(Entrants.isPlayerAlive)
 Remotes.onRequestAttack(function(player, slot, aim)
 	local entrant = Entrants.fromPlayer(player)
 	if entrant then
 		CombatService.attack(entrant, slot, aim)
+	end
+end)
+Remotes.onRequestUseItem(function(player, slot)
+	local entrant = Entrants.fromPlayer(player)
+	if entrant then
+		SurvivalService.useItem(entrant, slot)
 	end
 end)
 
@@ -29,8 +36,10 @@ end)
 
 RoundService.onPhaseChanged(BotService.onPhaseChanged)
 RoundService.onPhaseChanged(CombatService.onPhaseChanged)
+RoundService.onPhaseChanged(SurvivalService.onPhaseChanged)
 RoundService.onPhaseChanged(function(phase, round)
 	LootService.onPhaseChanged(phase, round.arena)
 end)
 
+SurvivalService.start()
 RoundService.start()
