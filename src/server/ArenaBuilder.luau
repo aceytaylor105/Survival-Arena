@@ -12,6 +12,7 @@ export type Arena = {
 	model: Model,
 	sizeName: LobbySize.SizeName,
 	size: LobbySize.Size,
+	seed: number, -- seeds this round's crate placement and contents
 	center: Vector3, -- top of the floor at the arena center
 	pads: { CFrame }, -- where each Entrant stands, facing the Spire
 	crates: { BasePart },
@@ -66,7 +67,7 @@ function ArenaBuilder.makeCrate(position: Vector3, atSpire: boolean, parent: Ins
 		"Crate",
 		Vector3.new(crateSize, crateSize, crateSize),
 		CFrame.lookAt(position + Vector3.new(0, crateSize / 2, 0), Vector3.new(0, crateSize / 2, 0)),
-		Config.Colors.Pad,
+		Config.Colors.CommonCrate,
 		parent
 	)
 	part:SetAttribute("AtSpire", atSpire)
@@ -240,6 +241,7 @@ function ArenaBuilder.build(sizeName: LobbySize.SizeName, entrantCount: number, 
 		model = model,
 		sizeName = sizeName,
 		size = size,
+		seed = seed,
 		center = Vector3.zero,
 		pads = pads,
 		crates = crates,

@@ -34,6 +34,8 @@ local Config = {
 		MaxHunger = 100,
 		HungerDrainPerSecond = 0.25, -- empty after about 6.7 minutes
 		StarvingDamagePerSecond = 1,
+		-- Hunger each food restores when eaten.
+		FoodRestores = { Berries = 20, Bread = 40, FeastBasket = 100 },
 	},
 
 	Weapons = {
@@ -46,6 +48,16 @@ local Config = {
 		TierWeights = { Common = 70, Rare = 25, Epic = 5 },
 		SpireTierWeights = { Common = 30, Rare = 50, Epic = 20 },
 		CratesPerPlayer = 3,
+		ItemsPerCrate = { Common = 1, Rare = 2, Epic = 3 },
+		-- Item weights within each tier. Items are Weapons or Survival.FoodRestores entries.
+		TierItems = {
+			Common = { Berries = 3, Spear = 2 },
+			Rare = { Axe = 2, Bow = 1, Bread = 2 },
+			Epic = { Axe = 1, Bow = 2, FeastBasket = 2 },
+		},
+		OpenSeconds = 0.5, -- hold time on a crate's prompt
+		Reach = 10, -- prompt distance from an Entrant to a crate
+		ReachSlack = 3, -- extra distance the server allows when it re-checks the reach
 	},
 
 	Bots = {
@@ -97,6 +109,9 @@ local Config = {
 		Pad = { 86, 108, 160 },
 		Lobby = { 150, 150, 160 },
 		LobbyWall = { 110, 110, 122 },
+		CommonCrate = { 160, 120, 80 },
+		RareCrate = { 70, 130, 210 },
+		EpicCrate = { 170, 90, 210 },
 	},
 }
 
