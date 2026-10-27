@@ -5,6 +5,7 @@ local Config = {
 		WaitSeconds = 60, -- start with whoever is queued after this
 		MinPlayers = 2,
 		MaxPlayers = 24,
+		CheckSeconds = 0.5, -- how often the queue recounts the lobby
 	},
 
 	-- Chosen by LobbySize.luau from the human player count
@@ -19,6 +20,7 @@ local Config = {
 		ResultsSeconds = 15,
 		FeastAtPlayersLeft = 5,
 		SpawnRingFraction = 0.35, -- pads sit on a ring at this share of ArenaRadius
+		CheckSeconds = 0.25, -- how often the Active phase checks for a winner
 	},
 
 	Collapse = {
@@ -75,6 +77,16 @@ local Config = {
 		Size = 100,
 		WallHeight = 12,
 		SpawnFraction = 0.6, -- players spawn within this share of the platform
+		RespawnSeconds = 3, -- after falling or resetting in the lobby
+	},
+
+	Inventory = {
+		Slots = 6,
+	},
+
+	Remotes = {
+		MaxRequestsPerSecond = 10, -- per player, per remote; extra requests are dropped
+		AimTolerance = 0.01, -- an aim direction's length must be within 1 +/- this
 	},
 
 	-- Flat greybox colors, RGB 0-255.

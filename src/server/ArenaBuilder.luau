@@ -140,6 +140,18 @@ function ArenaBuilder.buildLobby(): Model
 		)
 	end
 
+	-- Default spawn point, so a freshly loaded character appears in the lobby.
+	local spawn = Instance.new("SpawnLocation")
+	spawn.Name = "LobbySpawn"
+	spawn.Anchored = true
+	spawn.CanCollide = false
+	spawn.Transparency = 1
+	spawn.Size = Vector3.new(lobby.Size * lobby.SpawnFraction, 1, lobby.Size * lobby.SpawnFraction)
+	spawn.CFrame = CFrame.new(lobby.CenterX, 0.5, 0)
+	spawn.Duration = 0 -- no spawn force field
+	spawn.Neutral = true
+	spawn.Parent = model
+
 	model.Parent = workspace
 	lobbyModel = model
 	return model
