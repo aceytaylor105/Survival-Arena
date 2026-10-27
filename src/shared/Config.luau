@@ -51,6 +51,41 @@ local Config = {
 		EnabledLive = false,
 		FillTo = 8,
 	},
+
+	-- Greybox map dimensions in studs, used by ArenaBuilder. The arena is centered on the origin.
+	Arena = {
+		FloorThickness = 4,
+		SpireBaseRadius = 16,
+		SpireBaseHeight = 2,
+		SpireWidth = 10,
+		SpireHeight = 70,
+		PadDiameter = 8,
+		PadHeight = 1,
+		SpawnHeight = 4, -- characters are placed this far above a pad's top
+		CrateSize = 4,
+		SpireCrateShare = 0.25, -- this share of a round's crates ring the Supply Spire
+		SpireCrateRingGap = 6, -- Spire crates sit this far outside the Spire base
+		CrateEdgeMargin = 15, -- scattered crates keep this far inside the arena edge
+		CratePadClearance = 10, -- and this far from spawn pads
+		CratePlacementTries = 12,
+	},
+
+	Lobby = {
+		CenterX = 750, -- the lobby platform sits beside the arena, at ground level
+		Size = 100,
+		WallHeight = 12,
+		SpawnFraction = 0.6, -- players spawn within this share of the platform
+	},
+
+	-- Flat greybox colors, RGB 0-255.
+	Colors = {
+		Floor = { 118, 138, 104 },
+		Spire = { 236, 226, 198 },
+		SpireBase = { 196, 186, 160 },
+		Pad = { 86, 108, 160 },
+		Lobby = { 150, 150, 160 },
+		LobbyWall = { 110, 110, 122 },
+	},
 }
 
 return table.freeze(Config)
