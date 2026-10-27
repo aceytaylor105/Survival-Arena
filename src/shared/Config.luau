@@ -81,13 +81,19 @@ local Config = {
 		EnabledInStudio = true, -- lets one person test a full round
 		EnabledLive = false,
 		FillTo = 8,
+		ThinkSeconds = 0.4,
+		AggroRange = 60, -- armed bots go after Entrants this close
+		HungryBelow = 50, -- bots eat when hunger drops under this
+		AimSpreadDegrees = 6, -- bow inaccuracy, so bots aren't perfect shots
+		BorderMargin = 10, -- bots keep this far inside the radius the border is closing to
+		ArriveDistance = 4, -- a wandering bot picks a new spot when this close to the last
 	},
 
 	-- Greybox map dimensions in studs, used by ArenaBuilder. The arena is centered on the origin.
 	Arena = {
 		FloorThickness = 4,
 		SpireBaseRadius = 16,
-		SpireBaseHeight = 2,
+		SpireBaseHeight = 1, -- low enough to walk onto
 		SpireWidth = 10,
 		SpireHeight = 70,
 		PadDiameter = 8,

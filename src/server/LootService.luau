@@ -72,6 +72,10 @@ function LootService.takeItem(entrant: Entrants.Entrant, slot: number): string?
 	return item
 end
 
+function LootService.hasFreeSlot(entrant: Entrants.Entrant): boolean
+	return table.find(LootService.inventory(entrant), EMPTY) ~= nil
+end
+
 local function addItem(inventory: { string }, item: string): boolean
 	local slot = table.find(inventory, EMPTY)
 	if not slot then
@@ -143,13 +147,13 @@ function LootService.openCrate(entrant: Entrants.Entrant, part: BasePart): boole
 	return true
 end
 
--- The closest unopened crate to `position`, if any are left.
-function LootService.nearestCrate(position: Vector3): BasePart?
+-- The closest unopened crate to `position` that `accept` allows, if any are left.
+function LootService.nearestCrate(position: Vector3, accept: ((BasePart) -> boolean)?): BasePart?
 	local best: BasePart? = nil
 	local bestDistance = math.huge
 	for part in crates do
 		local distance = (part.Position - position).Magnitude
-		if distance < bestDistance then
+		if distance < bestDistance and (not accept or accept(part)) then
 			best, bestDistance = part, distance
 		end
 	end
