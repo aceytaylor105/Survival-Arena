@@ -44,6 +44,16 @@ local Config = {
 		Bow = { Damage = 30, Range = 150, Cooldown = 1.5 },
 	},
 
+	Combat = {
+		MeleeArcDegrees = 70, -- melee hits targets within this angle of the aim direction
+		EyeHeight = 1.5, -- attacks start this far above the attacker's root part
+		HitFlashSeconds = 0.15,
+		TracerSeconds = 0.15, -- how long a bow shot's line stays visible
+		TracerWidth = 0.3,
+		KnockoutParticles = 40, -- size of the stylized burst on a knockout
+		KnockoutEffectSeconds = 2,
+	},
+
 	Loot = {
 		TierWeights = { Common = 70, Rare = 25, Epic = 5 },
 		SpireTierWeights = { Common = 30, Rare = 50, Epic = 20 },
@@ -112,6 +122,9 @@ local Config = {
 		CommonCrate = { 160, 120, 80 },
 		RareCrate = { 70, 130, 210 },
 		EpicCrate = { 170, 90, 210 },
+		Tracer = { 255, 240, 180 },
+		HitFlash = { 255, 255, 255 },
+		KnockoutBurst = { 255, 210, 90 },
 	},
 }
 
