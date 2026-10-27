@@ -1,0 +1,14 @@
+# Built place files
+/*.rbxl
+/*.rbxlx
+/*.rbxm
+/*.rbxmx
+
+# Roblox Studio lock files
+/*.rbxlx.lock
+/*.rbxl.lock
+
+# Generated selene std
+/roblox.yml
+
+sourcemap.json
