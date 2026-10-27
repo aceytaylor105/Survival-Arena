@@ -88,6 +88,12 @@ local Config = {
 		AimSpreadDegrees = 6, -- bow inaccuracy, so bots aren't perfect shots
 		BorderMargin = 10, -- bots keep this far inside the radius the border is closing to
 		ArriveDistance = 4, -- a wandering bot picks a new spot when this close to the last
+		StuckDistance = 1, -- a bot that moves less than this in a think, while it wants to move...
+		StuckThinks = 3, -- ...this many thinks in a row jumps and sidesteps
+		SidestepDistance = 10,
+		IdleBelowSpeed = 0.1, -- bots slower than this play the idle animation
+		RunAnimationSpeed = 12, -- bots moving faster than this play the run animation, slower the walk
+		AnimationFadeSeconds = 0.2,
 	},
 
 	-- Greybox map dimensions in studs, used by ArenaBuilder. The arena is centered on the origin.

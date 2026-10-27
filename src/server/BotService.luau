@@ -20,10 +20,18 @@ local SurvivalService = require(script.Parent.SurvivalService)
 
 local BotService = {}
 
+type Progress = {
+	lastPosition: Vector3?,
+	target: Vector3?, -- where the bot last asked to walk
+	stuckThinks: number,
+}
+
 local folder: Folder? = nil
 local arena: ArenaBuilder.Arena? = nil
 local random = Random.new()
 local wanderTargets: { [Entrants.Entrant]: Vector3 } = {}
+local progress: { [Entrants.Entrant]: Progress } = {}
+local animations: { idle: Animation, walk: Animation, run: Animation }? = nil
 
 function BotService.enabled(): boolean
 	if RunService:IsStudio() then
@@ -49,6 +57,84 @@ function BotService.claimPhysics(model: Model)
 	end
 end
 
+-- Animation ------------------------------------------------------------------------------------
+
+local function findAnimation(animate: Instance, holderName: string, animationName: string): Animation?
+	local holder = animate:FindFirstChild(holderName)
+	local animation = if holder then holder:FindFirstChild(animationName) else nil
+	if animation and animation:IsA("Animation") then
+		return animation
+	end
+	return nil
+end
+
+-- The default idle, walk and run animations, copied once from a character's Animate
+-- script (the bot's own, if its rig has one, otherwise a player's). No asset ids are
+-- hard-coded: bots move the way default characters in this experience move.
+local function defaultAnimations(model: Model): { idle: Animation, walk: Animation, run: Animation }?
+	if animations then
+		return animations
+	end
+	local sources: { Instance } = { model }
+	for _, player in Players:GetPlayers() do
+		if player.Character then
+			table.insert(sources, player.Character)
+		end
+	end
+	for _, source in sources do
+		local animate = source:FindFirstChild("Animate")
+		if animate then
+			local idle = findAnimation(animate, "idle", "Animation1")
+			local walk = findAnimation(animate, "walk", "WalkAnim")
+			local run = findAnimation(animate, "run", "RunAnim")
+			if idle and walk and run then
+				animations = { idle = idle:Clone(), walk = walk:Clone(), run = run:Clone() }
+				return animations
+			end
+		end
+	end
+	return nil
+end
+
+-- Plays idle, walk or run on a bot to match its speed. Bots aren't player characters, so
+-- their animations must be loaded and played on the server to replicate.
+local function animate(model: Model)
+	local humanoid = model:FindFirstChildOfClass("Humanoid")
+	local library = defaultAnimations(model)
+	if not humanoid or not library then
+		return
+	end
+	local animator: Animator = humanoid:FindFirstChildOfClass("Animator") or Instance.new("Animator")
+	animator.Parent = humanoid
+	local idle = animator:LoadAnimation(library.idle)
+	local walk = animator:LoadAnimation(library.walk)
+	local run = animator:LoadAnimation(library.run)
+
+	local fade = Config.Bots.AnimationFadeSeconds
+	local current: AnimationTrack? = nil
+	local function play(track: AnimationTrack, speed: number)
+		if track ~= current then
+			if current then
+				current:Stop(fade)
+			end
+			current = track
+			track:Play(fade)
+		end
+		track:AdjustSpeed(speed)
+	end
+
+	play(idle, 1)
+	humanoid.Running:Connect(function(speed: number)
+		if speed <= Config.Bots.IdleBelowSpeed then
+			play(idle, 1)
+		elseif speed > Config.Bots.RunAnimationSpeed then
+			play(run, speed / humanoid.WalkSpeed)
+		else
+			play(walk, speed / Config.Bots.RunAnimationSpeed)
+		end
+	end)
+end
+
 -- Spawns bot number `index` standing at `at` and returns its model. Yields while the rig loads.
 function BotService.spawn(index: number, at: CFrame): Model
 	if not folder then
@@ -67,6 +153,7 @@ function BotService.spawn(index: number, at: CFrame): Model
 	model:PivotTo(at)
 	model.Parent = folder
 	BotService.claimPhysics(model)
+	animate(model)
 	return model
 end
 
@@ -75,6 +162,7 @@ function BotService.despawnAll()
 		folder:ClearAllChildren()
 	end
 	table.clear(wanderTargets)
+	table.clear(progress)
 end
 
 -- Thinking ---------------------------------------------------------------------------------
@@ -141,6 +229,46 @@ local function wanderTarget(bot: Entrants.Entrant, position: Vector3, center: Ve
 	return fresh
 end
 
+-- Bots walk straight at their targets, so a crate or the Spire can stop them. A bot that
+-- wants to move but hasn't for a few thinks jumps (crates are lower than a jump) and
+-- sidesteps (the Spire isn't). Returns true when it is busy getting unstuck.
+local function unstick(bot: Entrants.Entrant, humanoid: Humanoid, position: Vector3): boolean
+	local state = progress[bot]
+	if not state then
+		state = { lastPosition = nil, target = nil, stuckThinks = 0 }
+		progress[bot] = state
+	end
+	local last, target = state.lastPosition, state.target
+	state.lastPosition = position
+	local wantsToMove = target ~= nil and (target - position).Magnitude > Config.Bots.ArriveDistance
+	if not last or not target or not wantsToMove or (position - last).Magnitude >= Config.Bots.StuckDistance then
+		state.stuckThinks = 0
+		return false
+	end
+	state.stuckThinks += 1
+	if state.stuckThinks < Config.Bots.StuckThinks then
+		return false
+	end
+	state.stuckThinks = 0
+	local heading = Vector3.new(target.X - position.X, 0, target.Z - position.Z)
+	local side = if heading.Magnitude > 0 then heading.Unit:Cross(Vector3.yAxis) else Vector3.xAxis
+	if random:NextNumber() < 0.5 then
+		side = -side
+	end
+	humanoid.Jump = true
+	humanoid:MoveTo(position + side * Config.Bots.SidestepDistance)
+	return true
+end
+
+-- Walks the bot toward `target` and remembers it, so unstick can tell when it stalls.
+local function walk(bot: Entrants.Entrant, humanoid: Humanoid, target: Vector3)
+	local state = progress[bot]
+	if state then
+		state.target = target
+	end
+	humanoid:MoveTo(target)
+end
+
 local function think(bot: Entrants.Entrant, current: ArenaBuilder.Arena)
 	local root = Entrants.rootPart(bot)
 	local humanoid = Entrants.humanoid(bot)
@@ -148,13 +276,16 @@ local function think(bot: Entrants.Entrant, current: ArenaBuilder.Arena)
 		return
 	end
 	local position = root.Position
+	if unstick(bot, humanoid, position) then
+		return
+	end
 	local center = current.center
 	local flat = Vector3.new(position.X - center.X, 0, position.Z - center.Z)
 
 	-- 1. Stay inside the radius the border is closing to.
 	local safeRadius = math.max(0, CollapseService.targetRadius() - Config.Bots.BorderMargin)
 	if flat.Magnitude > safeRadius and flat.Magnitude > 0 then
-		humanoid:MoveTo(center + flat.Unit * safeRadius / 2)
+		walk(bot, humanoid, center + flat.Unit * safeRadius / 2)
 		return
 	end
 
@@ -179,9 +310,9 @@ local function think(bot: Entrants.Entrant, current: ArenaBuilder.Arena)
 			local aim = (enemyRoot.Position - origin).Unit
 			local ranged = Combat.isRanged(item)
 			CombatService.attack(bot, slot, if ranged then withSpread(aim) else aim)
-			humanoid:MoveTo(if ranged then position else enemyRoot.Position)
+			walk(bot, humanoid, if ranged then position else enemyRoot.Position)
 		else
-			humanoid:MoveTo(enemyRoot.Position)
+			walk(bot, humanoid, enemyRoot.Position)
 		end
 		return
 	end
@@ -196,14 +327,14 @@ local function think(bot: Entrants.Entrant, current: ArenaBuilder.Arena)
 			if (crate.Position - position).Magnitude <= Config.Loot.Reach then
 				LootService.openCrate(bot, crate)
 			else
-				humanoid:MoveTo(crate.Position)
+				walk(bot, humanoid, crate.Position)
 			end
 			return
 		end
 	end
 
 	-- 5. Wander inside the border. The Collapse brings everyone together in the end.
-	humanoid:MoveTo(wanderTarget(bot, position, center, safeRadius))
+	walk(bot, humanoid, wanderTarget(bot, position, center, safeRadius))
 end
 
 function BotService.onPhaseChanged(phase: string, roundArena: ArenaBuilder.Arena?)
