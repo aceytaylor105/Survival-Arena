@@ -156,6 +156,16 @@ function LootService.nearestCrate(position: Vector3): BasePart?
 	return best
 end
 
+-- The Feast: epic crates on a ring around the Supply Spire, once per round.
+function LootService.startFeast(arena: ArenaBuilder.Arena)
+	local parent = arena.model:FindFirstChild("Crates") or arena.model
+	local count = Config.Loot.FeastCrates
+	for _, point in ArenaBuilder.spireRing(count, 3, math.pi / count) do
+		LootService.stockCrate(ArenaBuilder.makeCrate(point, true, parent), "Epic")
+	end
+	Remotes.feastStarted()
+end
+
 local function setCratesOpen(open: boolean)
 	cratesOpen = open
 	for _, crate in crates do

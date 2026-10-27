@@ -27,6 +27,11 @@ local Config = {
 		StageSeconds = 90,
 		FinalRadius = 30,
 		DamagePerSecondOutside = 5,
+		UpdateSeconds = 0.25, -- how often the wall moves and outside damage applies
+		WallSegments = 48,
+		WallHeight = 80,
+		WallThickness = 1,
+		WallTransparency = 0.55,
 	},
 
 	Survival = {
@@ -69,6 +74,7 @@ local Config = {
 		OpenSeconds = 0.5, -- hold time on a crate's prompt
 		Reach = 10, -- prompt distance from an Entrant to a crate
 		ReachSlack = 3, -- extra distance the server allows when it re-checks the reach
+		FeastCrates = 5, -- epic crates that appear at the Spire for the Feast
 	},
 
 	Bots = {
@@ -126,6 +132,7 @@ local Config = {
 		Tracer = { 255, 240, 180 },
 		HitFlash = { 255, 255, 255 },
 		KnockoutBurst = { 255, 210, 90 },
+		CollapseWall = { 235, 95, 60 },
 	},
 }
 

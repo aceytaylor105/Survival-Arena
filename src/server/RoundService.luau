@@ -11,6 +11,7 @@ local RoundPhases = require(ReplicatedStorage.Shared.RoundPhases)
 local ArenaBuilder = require(script.Parent.ArenaBuilder)
 local BotService = require(script.Parent.BotService)
 local Entrants = require(script.Parent.Entrants)
+local LootService = require(script.Parent.LootService)
 local QueueService = require(script.Parent.QueueService)
 local Remotes = require(script.Parent.Remotes)
 
@@ -146,7 +147,8 @@ local function runRound()
 	setPhase("Countdown", workspace:GetServerTimeNow() + Config.Round.CountdownSeconds)
 	task.wait(Config.Round.CountdownSeconds)
 
-	-- Active: runs until one Entrant (or none) is left.
+	-- Active: runs until one Entrant (or none) is left. The Feast happens once, as soon as
+	-- FeastAtPlayersLeft or fewer remain.
 	for _, entrant in Entrants.living() do
 		Entrants.setFrozen(entrant, false)
 	end
@@ -154,6 +156,10 @@ local function runRound()
 	setPhase("Active", round.activeStartedAt + (RoundPhases.duration("Active", arena.size) or 0))
 	Remotes.playersLeftChanged(Entrants.livingCount())
 	while not RoundPhases.isRoundOver(Entrants.livingCount()) do
+		if RoundPhases.feastDue(Entrants.livingCount(), round.feastHeld) then
+			round.feastHeld = true
+			LootService.startFeast(arena)
+		end
 		task.wait(Config.Round.CheckSeconds)
 	end
 
