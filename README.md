@@ -28,12 +28,18 @@ lune run test
 rojo build default.project.json -o build.rbxl
 ```
 
-Strict type checking (not part of the gate, but worth running):
+Two more checks that aren't part of the gate but are worth running:
 
 ```sh
+# Strict type checking
 rojo sourcemap default.project.json -o sourcemap.json
 luau-lsp analyze --platform=roblox --sourcemap=sourcemap.json --definitions=@roblox=<path to globalTypes.d.luau> src
+
+# Headless simulations: whole rounds of the real server and client code, no Studio needed
+lune run sim             # or: lune run sim arena | rounds | client
 ```
+
+The simulations in `tools/sim` run the game's own modules against a fake engine with a virtual clock, so two full rounds take seconds. Movement is straight lines and raycasts only see characters. They catch logic and runtime errors after a change, not physics or feel, so Studio playtests still decide whether something works.
 
 ## How a round works
 
@@ -72,6 +78,7 @@ Every number is in [`src/shared/Config.luau`](src/shared/Config.luau). The spec'
 - `src/shared`: pure game rules with no Roblox APIs (`Config`, `LobbySize`, `RoundPhases`, `Collapse`, `LootTable`, `Combat`, `Survival`), tested by Lune specs in `tests/`.
 - `src/server`: services that connect those rules to the engine. `RoundService` runs the phase loop, and every other service reacts to its phase changes. `Remotes` validates and rate-limits every client request. `Entrants` holds each round's players and bots with their server-side health and hunger.
 - `src/client`: input, HUD and spectating. The client only sends intent (which slot, which way it's aiming); the server decides everything else.
+- `tools/sim`: the headless simulations (`lune run sim`). These files are not type-checked, because they fake the engine with dynamic tables.
 
 Remotes beyond the spec's list: `InventoryChanged` (the HUD needs to show slots) and `FeastStarted` (for the banner). `PhaseChanged` also carries the winner's name in Results.
 
@@ -90,12 +97,12 @@ Every task passes the quality gate and strict type checking. The pure-rule check
 | 10 | A solo playtest with `FillTo = 8` finishes a whole round |
 | 11 | Every action works at a phone size in the device emulator |
 
-The server and client code was exercised in a headless simulation outside this repo (fake engine, virtual clock, straight-line movement, no physics). It ran two full loops with one idle tester and seven bots with no runtime errors, and covered the same behaviors as checks 5, 7, 9 and 10 plus every HUD and input path. Treat that as evidence, not as a substitute for the Studio checks.
+`lune run sim` covers the same behaviors as checks 4, 5, 7, 9 and 10, plus every HUD and input path, and passes. Treat that as evidence, not as a substitute for the Studio checks.
 
 Known gaps to watch for in Studio:
 
-- **Bots don't animate.** They slide; there is no server-side animation script for them yet.
-- **Bots walk in straight lines** with `Humanoid:MoveTo`, with no pathfinding. On the flat disc that should be fine, but they can catch on crates or the Spire.
+- **Bots have no pathfinding.** They walk straight at their targets. A bot that stalls jumps and sidesteps, which should clear crates and the Spire on the flat disc. Watch for bots that still get stuck.
+- **Bot animations come from player characters.** Bots copy the idle, walk and run animations from a character's `Animate` script. Check that they animate in Studio rather than slide.
 - **Sprint is client-side.** It sets `WalkSpeed` locally, like normal movement. If the place turns on Roblox's Server Authority feature, sprint needs to move to the server.
 - **The Feast fires immediately in Showdown.** It triggers as soon as 5 or fewer remain, and a Showdown starts with 5 or fewer.
 
