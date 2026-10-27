@@ -20,7 +20,7 @@ export type Entrant = {
 local Entrants = {}
 
 -- Living Entrants' characters carry this tag; clients use it to pick spectate targets.
-Entrants.LivingTag = "LivingEntrant"
+Entrants.LivingTag = Config.Round.LivingEntrantTag
 
 local list: { Entrant } = {}
 local byPlayer: { [Player]: Entrant } = {}

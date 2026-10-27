@@ -21,6 +21,7 @@ local Config = {
 		FeastAtPlayersLeft = 5,
 		SpawnRingFraction = 0.35, -- pads sit on a ring at this share of ArenaRadius
 		CheckSeconds = 0.25, -- how often the Active phase checks for a winner
+		LivingEntrantTag = "LivingEntrant", -- tag on living Entrants' characters
 	},
 
 	Collapse = {
@@ -119,6 +120,41 @@ local Config = {
 		Slots = 6,
 	},
 
+	Movement = {
+		WalkSpeed = 16,
+		SprintSpeed = 24,
+	},
+
+	Input = {
+		AimDistance = 500, -- how far the client looks for an aim point under the cursor or crosshair
+	},
+
+	-- HUD sizes in pixels.
+	Hud = {
+		Padding = 12,
+		TextSize = 18,
+		TitleTextSize = 26,
+		SmallTextSize = 14,
+		TinyTextSize = 12,
+		CornerRadius = 6,
+		SlotStroke = 1,
+		SelectedSlotStroke = 3,
+		BarWidth = 220,
+		BarHeight = 18,
+		SlotSize = 56,
+		TouchButtonSize = 76, -- big enough for a thumb on a phone
+		SpectateButtonSize = 56,
+		KillFeedLines = 4,
+		KillFeedSeconds = 6,
+		BannerSeconds = 4,
+		BorderWarningDistance = 15, -- warn when this close to the border
+		PanelTransparency = 0.35,
+		TextStrokeTransparency = 0.6, -- outline that keeps text readable over the world
+		RefreshSeconds = 0.1,
+		CoreGuiRetries = 20, -- StarterGui:SetCore can fail until the core scripts load
+		CoreGuiRetrySeconds = 0.5,
+	},
+
 	Remotes = {
 		MaxRequestsPerSecond = 10, -- per player, per remote; extra requests are dropped
 		AimTolerance = 0.01, -- an aim direction's length must be within 1 +/- this
@@ -139,6 +175,13 @@ local Config = {
 		HitFlash = { 255, 255, 255 },
 		KnockoutBurst = { 255, 210, 90 },
 		CollapseWall = { 235, 95, 60 },
+		Panel = { 20, 22, 28 },
+		Text = { 245, 245, 245 },
+		Health = { 220, 70, 70 },
+		Hunger = { 230, 170, 60 },
+		Warning = { 255, 110, 80 },
+		Danger = { 255, 60, 60 },
+		SelectedSlot = { 255, 220, 120 },
 	},
 }
 
