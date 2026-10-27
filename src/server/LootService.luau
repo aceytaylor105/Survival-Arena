@@ -86,7 +86,7 @@ end
 -- Gives a crate part its tier, contents, color and prompt. `tier` forces the tier (the Feast).
 function LootService.stockCrate(part: BasePart, tier: LootTable.Tier?)
 	local weights = if part:GetAttribute("AtSpire") then Config.Loot.SpireTierWeights else Config.Loot.TierWeights
-	local crateTier = tier or LootTable.rollTier(weights, nextRoll)
+	local crateTier: LootTable.Tier = tier or LootTable.rollTier(weights, nextRoll)
 	local color = tierColors[crateTier]
 	part.Color = Color3.fromRGB(color[1], color[2], color[3])
 	part:SetAttribute("Tier", crateTier)

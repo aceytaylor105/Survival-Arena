@@ -69,8 +69,8 @@ local function makeLimiter(): (Player) -> boolean
 		local now = os.clock()
 		local window = windows[player]
 		if not window or now - window.startedAt >= 1 then
-			window = { startedAt = now, count = 0 }
-			windows[player] = window
+			windows[player] = { startedAt = now, count = 1 }
+			return 1 <= Config.Remotes.MaxRequestsPerSecond
 		end
 		window.count += 1
 		return window.count <= Config.Remotes.MaxRequestsPerSecond

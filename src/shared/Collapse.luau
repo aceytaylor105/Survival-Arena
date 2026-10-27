@@ -53,4 +53,4 @@ function Collapse.isOutside(radius: number, dx: number, dz: number): boolean
 	return dx * dx + dz * dz > radius * radius
 end
 
-return table.freeze(Collapse)
+return Collapse

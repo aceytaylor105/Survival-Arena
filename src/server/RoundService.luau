@@ -117,7 +117,7 @@ local function runRound()
 
 	-- Countdown: build the arena, put everyone on a pad and hold them there.
 	local botCount = BotService.botsNeeded(#roster)
-	local sizeName = LobbySize.pick(#roster + botCount)
+	local sizeName: LobbySize.SizeName? = LobbySize.pick(#roster + botCount)
 	if not sizeName then
 		return -- not enough players any more; back to Waiting
 	end
@@ -195,10 +195,9 @@ function RoundService.start()
 
 	task.spawn(function()
 		while true do
-			local ok, err = pcall(runRound)
-			if not ok then
-				warn(`Round failed, returning to the lobby: {err}`)
-			end
+			xpcall(runRound, function(message: unknown)
+				warn(`Round failed, returning to the lobby: {message}\n{debug.traceback()}`)
+			end)
 			if round.phase ~= "Waiting" then
 				resetToLobby()
 			end

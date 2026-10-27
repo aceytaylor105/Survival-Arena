@@ -9,7 +9,12 @@ export type Weights = { [string]: number }
 
 local LootTable = {}
 
-LootTable.Tiers = table.freeze({ "Common", "Rare", "Epic" } :: { Tier })
+local TIERS: { Tier } = { "Common", "Rare", "Epic" }
+LootTable.Tiers = TIERS
+
+-- Config's item tables viewed as lookups by item name (cast through unknown to widen keys).
+local weapons = (Config.Weapons :: unknown) :: { [string]: unknown }
+local foodValues = (Config.Survival.FoodRestores :: unknown) :: { [string]: number }
 
 -- Picks a key from `weights` for `roll` in [0, 1). Keys are walked in sorted order, so the
 -- same roll always picks the same key. Keys with zero weight are never picked.
@@ -50,12 +55,12 @@ function LootTable.rollContents(tier: Tier, nextRoll: () -> number): { string }
 end
 
 function LootTable.isWeapon(item: string): boolean
-	return (Config.Weapons :: { [string]: unknown })[item] ~= nil
+	return weapons[item] ~= nil
 end
 
 -- Hunger restored by eating `item`, or nil when it isn't food.
 function LootTable.foodValue(item: string): number?
-	return (Config.Survival.FoodRestores :: { [string]: number })[item]
+	return foodValues[item]
 end
 
-return table.freeze(LootTable)
+return LootTable

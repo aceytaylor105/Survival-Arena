@@ -14,7 +14,8 @@ export type Size = {
 local LobbySize = {}
 
 -- Smallest first.
-LobbySize.Names = table.freeze({ "Showdown", "Skirmish", "FullArena" } :: { SizeName })
+local NAMES: { SizeName } = { "Showdown", "Skirmish", "FullArena" }
+LobbySize.Names = NAMES
 
 function LobbySize.get(name: SizeName): Size
 	return Config.LobbySizes[name]
@@ -26,7 +27,7 @@ function LobbySize.pick(playerCount: number): (SizeName?, Size?)
 	if playerCount ~= playerCount or playerCount % 1 ~= 0 then
 		return nil, nil
 	end
-	for _, name in LobbySize.Names do
+	for _, name: SizeName in LobbySize.Names do
 		local size = LobbySize.get(name)
 		if playerCount >= size.MinPlayers and playerCount <= size.MaxPlayers then
 			return name, size
@@ -35,4 +36,4 @@ function LobbySize.pick(playerCount: number): (SizeName?, Size?)
 	return nil, nil
 end
 
-return table.freeze(LobbySize)
+return LobbySize

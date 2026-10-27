@@ -9,7 +9,8 @@ export type Phase = "Waiting" | "Countdown" | "Active" | "Results"
 
 local RoundPhases = {}
 
-RoundPhases.Order = table.freeze({ "Waiting", "Countdown", "Active", "Results" } :: { Phase })
+local ORDER: { Phase } = { "Waiting", "Countdown", "Active", "Results" }
+RoundPhases.Order = ORDER
 
 -- The phase after `phase`; Results loops back to Waiting.
 function RoundPhases.next(phase: Phase): Phase
@@ -47,4 +48,4 @@ function RoundPhases.feastDue(aliveCount: number, feastHeld: boolean): boolean
 	return not feastHeld and aliveCount <= Config.Round.FeastAtPlayersLeft
 end
 
-return table.freeze(RoundPhases)
+return RoundPhases
